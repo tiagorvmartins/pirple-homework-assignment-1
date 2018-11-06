@@ -12,31 +12,31 @@
   var config = require('./config');
   var fs = require('fs');
 
-  // We are instantiate the HTTP server
+  //We are instantiate the HTTP server
   var httpServer = http.createServer(function (req, res){
-      unifiedServer(req,res);
+       unifiedServer(req,res);
   });
 
   // Start the HTTP server, and have it listen on port 3000
   httpServer.listen(config.httpPort, function(){
-    console.log("The server ["+config.envName+"] is listening on port "+config.httpPort + " now");
+     console.log("The server ["+config.envName+"] is listening on port "+config.httpPort + " now");
   });
 
   // Instantiate the HTTPS createServer
   var httpsServerOptions = {
-      'key': fs.readFileSync('./https/key.pem'),
-      'cert': fs.readFileSync('./https/cert.pem')
+       'key': fs.readFileSync('./https/key.pem'),
+       'cert': fs.readFileSync('./https/cert.pem')
   };
 
+  // Defining the HTTPS Server
   var httpsServer = https.createServer(httpsServerOptions, function (req, res){
-      unifiedServer(req,res);
+       unifiedServer(req,res);
   });
 
   // Start the HTTPS server
   httpsServer.listen(config.httpsPort, function(){
     console.log("The server ["+config.envName+"] is listening on port "+config.httpsPort + " now");
   });
-
 
   // All the server logic for both the http and https server
   var unifiedServer = function(req, res){
@@ -101,29 +101,32 @@
     });
   };
 
-
-
   // Define the handlers
   var handlers = {};
 
   // Sample handlers
-  handlers.sample = function(data, callback){
+  handlers.hello = function(data, callback){
     // Callback a http status code, and a payload object
-    callback(406,{'name':'sample handler'});
-  };
-
-  handlers.ping = function(data, callback){
-    // Callback a http status code, and a payload object
-    callback(200);
+    callback(200,
+          {
+            'WelcomeMessage':'Hello you successfuly reached my \'hello\' endpoint. Have a nice day, thank you.',
+            'StatusCode': '200',
+            'YourRequestData': data
+          }
+    );
   };
 
   // Not found handler
   handlers.notFound = function(data, callback){
-    callback(404);
+    callback(404,
+          {
+            'WelcomeMessage': 'The endpoint that you requested is not defined nor available. Have a nice day, thank you.',
+            'StatusCode': '404',
+            'YourRequestData': data
+          });
   };
 
-  // Define a request router
+  // Define the only route handler available
   var router = {
-    'sample' : handlers.sample,
-    'ping': handlers.ping
+    'hello': handlers.hello
   }
